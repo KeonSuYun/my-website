@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品画廊 | Solomon AI</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        neon: {
+                            purple: '#d946ef',
+                            cyan: '#06b6d4',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- 引入 Lucide 图标 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        .model-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.3);
+        }
+        .model-card:hover .model-preview {
+            transform: scale(1.05);
+        }
+        /* 筛选动画相关类 */
+        .scale-out {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        /* 弹窗动画 */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+
+    <!-- 导航栏 -->
+    <nav class="bg-dark-bg/80 backdrop-blur-md border-b border-dark-border sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-black tracking-tighter text-white flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-8 h-8 text-brand-500"></i>
+                        Solomon <span class="text-brand-500">AI</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-slate-400 hover:text-white transition py-2 text-sm font-medium">首页</a>
+                    <a href="#" class="text-white border-b-2 border-brand-500 py-2 text-sm font-bold">作品画廊</a>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-white hover:text-brand-500 transition">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <section class="relative py-16 bg-dark-bg border-b border-dark-border">
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <h1 class="text-4xl font-black text-white mb-4">作品画廊</h1>
+            <p class="text-slate-400 max-w-2xl text-lg">
+                探索 Solomon AI 与独立开发者合作创造的数字资产。点击下方卡片查看细节。
+            </p>
+            
+            <!-- 分类筛选按钮 -->
+            <div class="flex flex-wrap gap-3 mt-8" id="filter-container">
+                <button data-filter="all" class="filter-btn active px-5 py-2 bg-brand-600 text-white rounded-full text-sm font-bold shadow-lg shadow-brand-500/20 transition-all">全部作品</button>
+                <button data-filter="character" class="filter-btn px-5 py-2 bg-dark-card border border-dark-border text-slate-300 rounded-full text-sm hover:border-brand-500 hover:text-white transition-all">角色模型</button>
+                <button data-filter="environment" class="filter-btn px-5 py-2 bg-dark-card border border-dark-border text-slate-300 rounded-full text-sm hover:border-brand-500 hover:text-white transition-all">环境资产</button>
+                <button data-filter="prop" class="filter-btn px-5 py-2 bg-dark-card border border-dark-border text-slate-300 rounded-full text-sm hover:border-brand-500 hover:text-white transition-all">道具/载具</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心画廊区域 -->
+    <section class="py-12 flex-grow min-h-[600px]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="gallery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- 作品 1: 角色 -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="character"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1618331835717-801e976710b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="赛博朋克游侠" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-brand-500/20 text-brand-400 border border-brand-500/30 rounded text-xs font-mono">Character</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-brand-400 transition">赛博朋克游侠</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">5k Tris</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">基于 SDXL 生成概念图，经 Hunyuan3D 转模并人工修复布线，适用于 Unity URP 管线。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">FBX</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">PBR</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 作品 2: 道具 -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="prop"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1626285861696-9f0bf5a49c6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="水晶战斧" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-neon-purple/20 text-neon-purple border border-neon-purple/30 rounded text-xs font-mono">Weapon</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-neon-purple transition">水晶战斧</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">2.5k Tris</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">低模手绘风格道具，色彩饱和度高，专为移动端 RPG 游戏设计。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">OBJ</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Hand-painted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 作品 3: 场景 -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="environment"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="异星遗迹" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-xs font-mono">Environment</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-emerald-400 transition">异星遗迹</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">Scene</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">模块化场景组件包，包含12个独立的建筑废墟与植被资产。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Modular</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">UE5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 作品 4: 载具 (Prop) -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="prop"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="重型工程机甲" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                         <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded text-xs font-mono">Hard Surface</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-orange-400 transition">重型工程机甲</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">12k Tris</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">硬表面建模练习，强调机械结构的合理性与做旧纹理细节。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Rigged</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">4K Textures</span>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- 作品 5: 风格化角色 (Character) -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="character"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1535295972055-1c762f4483e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Q版法师" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded text-xs font-mono">Stylized</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-pink-400 transition">Q版法师</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">3k Tris</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">高饱和度色彩与夸张比例，利用 AI 快速生成多套配色方案供客户选择。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Mobile</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">V-Ray</span>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- 作品 6: 道具 (Prop) -->
+                <div class="model-card group bg-dark-card rounded-xl overflow-hidden border border-dark-border cursor-pointer" 
+                     data-category="prop"
+                     onclick="openModal(this)">
+                    <div class="aspect-[4/3] bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1616440347437-b1c73416efc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="便携式能量核心" 
+                             class="model-preview w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <span class="px-2 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-xs font-mono">Sci-Fi</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="card-title text-lg font-bold text-white group-hover:text-blue-400 transition">便携式能量核心</h3>
+                            <span class="card-tris text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">1.5k Tris</span>
+                        </div>
+                        <p class="card-desc text-slate-400 text-sm mb-4 line-clamp-2">包含自发光贴图与简单的待机动画绑定。</p>
+                        <div class="flex gap-2 tags">
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Animation</span>
+                             <span class="text-xs text-slate-500 border border-dark-border px-2 py-1 rounded">Game Ready</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- 加载更多 -->
+            <div class="text-center mt-16">
+                <button id="load-more-btn" class="px-8 py-3 border border-dark-border text-slate-400 rounded-lg hover:border-brand-500 hover:text-white transition flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btn-text">加载更多历史作品</span>
+                    <i data-lucide="loader" id="btn-icon" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer class="bg-black py-8 border-t border-dark-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-slate-500 text-sm">&copy; 2024 Solomon AI. 保留所有权利。</p>
+            <div class="flex gap-4">
+                <a href="#" class="text-slate-500 hover:text-white transition"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                <a href="#" class="text-slate-500 hover:text-white transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <a href="#" class="text-slate-500 hover:text-white transition"><i data-lucide="mail" class="w-5 h-5"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 详情弹窗 (Modal) -->
+    <div id="modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- 背景遮罩 -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- 弹窗内容 -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative z-10 shadow-2xl flex flex-col md:flex-row animate-in fade-in zoom-in duration-300">
+            <!-- 关闭按钮 -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 transition">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <!-- 左侧大图 -->
+            <div class="w-full md:w-2/3 bg-slate-900 relative min-h-[300px]">
+                <img id="modal-img" src="" alt="Detail" class="w-full h-full object-contain">
+            </div>
+
+            <!-- 右侧信息 -->
+            <div class="w-full md:w-1/3 p-8 flex flex-col">
+                <div class="mb-auto">
+                    <h2 id="modal-title" class="text-2xl font-bold text-white mb-2">Title</h2>
+                    <span id="modal-tris" class="inline-block bg-brand-900/50 text-brand-400 text-xs px-2 py-1 rounded mb-6 font-mono">Unknown Tris</span>
+                    
+                    <h3 class="text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">Asset Description</h3>
+                    <p id="modal-desc" class="text-slate-400 text-sm mb-6 leading-relaxed">
+                        Description goes here.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">Technical Specs</h3>
+                    <div id="modal-tags" class="flex flex-wrap gap-2 mb-6">
+                        <!-- Tags injected by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-dark-border">
+                    <button class="w-full py-3 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        下载预览文件
+                    </button>
+                    <p class="text-center text-xs text-slate-600 mt-3">仅供查看，商用请联系客服</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本逻辑 -->
+    <script>
+        lucide.createIcons();
+
+        // --- 1. 分类筛选逻辑 ---
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const cards = document.querySelectorAll('.model-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有按钮的激活状态
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-brand-600', 'text-white', 'shadow-lg');
+                    b.classList.add('bg-dark-card', 'text-slate-300', 'border', 'border-dark-border');
+                });
+                
+                // 激活当前按钮
+                btn.classList.remove('bg-dark-card', 'text-slate-300', 'border', 'border-dark-border');
+                btn.classList.add('bg-brand-600', 'text-white', 'shadow-lg');
+
+                const filterValue = btn.getAttribute('data-filter');
+
+                // 筛选卡片
+                cards.forEach(card => {
+                    if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+                        card.classList.remove('hidden');
+                        setTimeout(() => {
+                            card.classList.remove('scale-out');
+                            card.style.display = 'block';
+                        }, 50);
+                    } else {
+                        card.classList.add('scale-out');
+                        setTimeout(() => {
+                            card.classList.add('hidden');
+                            card.style.display = 'none';
+                        }, 300); // 等待动画结束
+                    }
+                });
+            });
+        });
+
+        // --- 2. 详情弹窗逻辑 ---
+        const modal = document.getElementById('modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTris = document.getElementById('modal-tris');
+        const modalDesc = document.getElementById('modal-desc');
+        const modalTags = document.getElementById('modal-tags');
+
+        function openModal(card) {
+            // 获取数据
+            const imgSrc = card.querySelector('img').src;
+            const title = card.querySelector('.card-title').innerText;
+            const tris = card.querySelector('.card-tris').innerText;
+            const desc = card.querySelector('.card-desc').innerText;
+            const tagsHTML = card.querySelector('.tags').innerHTML;
+
+            // 填充数据
+            modalImg.src = imgSrc;
+            modalTitle.innerText = title;
+            modalTris.innerText = tris;
+            modalDesc.innerText = desc;
+            modalTags.innerHTML = tagsHTML; // 直接复用 HTML 结构
+
+            // 显示弹窗
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // 禁止背景滚动
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // 恢复滚动
+        }
+
+        // --- 3. 加载更多逻辑 ---
+        const loadBtn = document.getElementById('load-more-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnIcon = document.getElementById('btn-icon');
+
+        loadBtn.addEventListener('click', () => {
+            // 状态：加载中
+            loadBtn.disabled = true;
+            btnText.innerText = "正在从服务器获取...";
+            btnIcon.classList.add('animate-spin');
+
+            // 模拟延迟
+            setTimeout(() => {
+                // 状态：完成
+                btnText.innerText = "没有更多历史作品了";
+                btnIcon.classList.remove('animate-spin');
+                // btnIcon.style.display = 'none'; // 可以选择隐藏图标
+                
+                // 3秒后恢复（如果是真实加载，这里会插入新卡片）
+                setTimeout(() => {
+                     loadBtn.disabled = false;
+                     btnText.innerText = "加载更多历史作品";
+                }, 3000);
+            }, 1500);
+        });
+
+        // 按 ESC 关闭弹窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
