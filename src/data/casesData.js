@@ -22,8 +22,8 @@ export const casesData = [
         description: "专为第三人称/第一人称视角打造的主角级资产 (Hero Asset)。在保留斧柄缠绕物与金属倒角物理细节的前提下，将面数严格控制在 7,000 三角面 (Tris) 左右。布线流畅，完美支持形变动画与近距离特写展示。",
         tagType: "Weapon",
         tagColor: "orange",
-        modelPath: "/models/SM_Axe_Low.glb",
-        fileSize: "98.1 MB", 
+        modelPath: "https://github.com/KeonSuYun/my-website/releases/download/v1.0/SM_Axe_Low.glb",
+        fileSize: "105 MB", 
         wireframe: "/images/Axe_wireframe.webp"
     },
     {
