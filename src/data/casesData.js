@@ -16,14 +16,14 @@ export const casesData = [
         id: 2,
         title: "矮人符文战斧 (Dwarven Axe)",
         category: "prop",
-        image: "/images/Axe.png", 
+        image: "/images/Axe.webp", 
         tris: "7k Tris",
         tags: ["Hero Prop", "Retopology", "Game Ready"],
         description: "专为第三人称/第一人称视角打造的主角级资产 (Hero Asset)。在保留斧柄缠绕物与金属倒角物理细节的前提下，将面数严格控制在 7,000 三角面 (Tris) 左右。布线流畅，完美支持形变动画与近距离特写展示。",
         tagType: "Weapon",
         tagColor: "orange",
         modelPath: "/models/SM_Axe_Low.glb",
-        wireframe: "/images/Axe_wireframe.png"
+        wireframe: "/images/Axe_wireframe.webp"
     },
     {
         id: 3,

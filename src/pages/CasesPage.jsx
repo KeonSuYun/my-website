@@ -1,7 +1,7 @@
 // src/pages/CasesPage.jsx
 import React, { useState } from 'react';
-// 1. 修复：所有图标必须在这里一次性引入，不能写在文件底部
-import { ArrowLeft, Loader2, X, Grid, Box, FileText, Tags } from 'lucide-react';
+// 1. 引入 Download 图标
+import { ArrowLeft, Loader2, X, Grid, Box, FileText, Tags, Download } from 'lucide-react';
 import { casesData } from '../data/casesData';
 
 const CasesPage = ({ onNavigate }) => {
@@ -167,10 +167,10 @@ const CasesPage = ({ onNavigate }) => {
                             <X className="w-5 h-5" />
                         </button>
 
-                        {/* --- 左侧：展示区 --- */}
-                        <div className="w-full md:w-2/3 relative h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden group p-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-[#050a14]">
+                        {/* --- 左侧：展示区 (放大展示渲染图) --- */}
+                        <div className="w-full md:w-2/3 relative h-[400px] md:h-[600px] flex items-center justify-center overflow-hidden group p-4 md:p-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-[#050a14]">
                             
-                            {/* --- 切换按钮 --- */}
+                            {/* --- 切换按钮 (仅当有线框图时显示) --- */}
                             {selectedCase.wireframe && (
                                 <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 flex bg-black/40 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-lg">
                                     <button
@@ -210,41 +210,19 @@ const CasesPage = ({ onNavigate }) => {
                                     </div>
                                 </div>
                             ) : (
-                                // 2. 正常模式 (3D 或 图片)
-                                selectedCase.modelPath ? (
-                                    <>
-                                        <model-viewer
-                                            src={selectedCase.modelPath}
-                                            alt={selectedCase.title}
-                                            auto-rotate
-                                            camera-controls
-                                            shadow-intensity="2" 
-                                            environment-image="neutral"
-                                            exposure="1.1" 
-                                            style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-                                            class="animate-in fade-in duration-500 drop-shadow-2xl"
-                                        >
-                                            <div slot="progress-bar" className="absolute top-0 left-0 w-full h-0.5 bg-slate-800">
-                                                <div className="h-full bg-indigo-500 transition-all duration-300 logic-bar"></div>
-                                            </div>
-                                        </model-viewer>
-                                        
-                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/40 text-white/80 text-xs px-4 py-1.5 rounded-full pointer-events-none backdrop-blur-sm border border-white/5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                                            🖐️ 拖拽旋转 • 滚轮缩放
-                                        </div>
-                                    </>
-                                ) : (
+                                // 2. 正常模式 (放大展示渲染图)
+                                <div className="w-full h-full flex items-center justify-center animate-in fade-in duration-500">
                                     <img 
                                         src={selectedCase.image} 
-                                        alt="Detail" 
-                                        className="w-full h-full object-contain rounded-xl border border-white/5" 
+                                        alt={selectedCase.title} 
+                                        className="w-full h-full object-contain rounded-xl shadow-2xl drop-shadow-2xl" 
                                     />
-                                )
+                                </div>
                             )}
                         </div>
 
                         {/* 右侧：信息区 */}
-                        <div className="w-full md:w-1/3 p-10 flex flex-col bg-slate-900/95 border-l border-slate-700/50 overflow-y-auto">
+                        <div className="w-full md:w-1/3 p-8 md:p-10 flex flex-col bg-slate-900/95 border-l border-slate-700/50 overflow-y-auto">
                             <div className="mb-auto">
                                 <div className="flex items-start justify-between gap-4 mb-4">
                                     <h2 className="text-3xl font-black text-white leading-tight">{selectedCase.title}</h2>
@@ -254,9 +232,9 @@ const CasesPage = ({ onNavigate }) => {
                                      <span className="inline-flex items-center bg-indigo-500/10 text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-full border border-indigo-500/20 font-mono">
                                         <Box size={12} className="mr-1.5"/> {selectedCase.tris}
                                     </span>
-                                    {selectedCase.modelPath && (
+                                    {selectedCase.wireframe && (
                                          <span className="inline-flex items-center bg-emerald-500/10 text-emerald-300 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-500/20">
-                                            <Box size={12} className="mr-1.5" /> 3D Interactive
+                                            <Grid size={12} className="mr-1.5" /> Topology Ready
                                         </span>
                                     )}
                                 </div>
@@ -283,15 +261,23 @@ const CasesPage = ({ onNavigate }) => {
                                             ))}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-12 pt-6 border-t border-slate-800/50">
-                                <div className="bg-slate-800/40 rounded-xl p-4 text-center border border-slate-700/30 backdrop-blur-sm">
-                                    <p className="text-[11px] text-slate-400 font-medium">
-                                        此资产为 <span className="text-indigo-400 font-bold">Solomon AI</span> 独家技术展示标准。<br/>
-                                        商业合作请联系我们获取完整交付方案。
-                                    </p>
+                                    
+                                    {/* 3. 新增：下载按钮区域 */}
+                                    {selectedCase.modelPath && (
+                                        <div className="pt-4">
+                                            <a 
+                                                href={selectedCase.modelPath}
+                                                download
+                                                className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95 hover:-translate-y-0.5"
+                                            >
+                                                <Download size={18} />
+                                                下载模型文件 (.glb)
+                                            </a>
+                                            <p className="text-center text-[10px] text-slate-500 mt-2">
+                                                仅供非商业学习使用
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
