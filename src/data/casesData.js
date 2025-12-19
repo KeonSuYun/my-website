@@ -23,6 +23,7 @@ export const casesData = [
         tagType: "Weapon",
         tagColor: "orange",
         modelPath: "/models/SM_Axe_Low.glb",
+        fileSize: "98.1 MB", 
         wireframe: "/images/Axe_wireframe.webp"
     },
     {

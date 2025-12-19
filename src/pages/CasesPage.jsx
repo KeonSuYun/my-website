@@ -261,8 +261,6 @@ const CasesPage = ({ onNavigate }) => {
                                             ))}
                                         </div>
                                     </div>
-                                    
-                                    {/* 3. 新增：下载按钮区域 */}
                                     {selectedCase.modelPath && (
                                         <div className="pt-4">
                                             <a 
@@ -271,7 +269,15 @@ const CasesPage = ({ onNavigate }) => {
                                                 className="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95 hover:-translate-y-0.5"
                                             >
                                                 <Download size={18} />
-                                                下载模型文件 (.glb)
+                                                {/* 这里修改文字显示逻辑 */}
+                                                <span>
+                                                    下载模型文件 
+                                                    {selectedCase.fileSize && (
+                                                        <span className="text-indigo-200 ml-1 text-sm font-normal">
+                                                            ({selectedCase.fileSize})
+                                                        </span>
+                                                    )}
+                                                </span>
                                             </a>
                                             <p className="text-center text-[10px] text-slate-500 mt-2">
                                                 仅供非商业学习使用
